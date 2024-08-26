@@ -3,7 +3,7 @@
     DSM | Users and employees
 @endsection
 @section('content')
-    <x-tables.container title="Manage Users" createTitle="Create New User" :createUrl="route('users.create') ">
+    <x-tables.container title="Manage Users" createRoleName="Users_Create" createTitle="Create New User" :createUrl="route('users.create') ">
        <table class="table table-bordered" id="users">
             <thead>
                 <th>

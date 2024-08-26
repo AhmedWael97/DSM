@@ -29,6 +29,13 @@
                                 icon: "success"
                             });
                             location.reload();
+                        },
+                        error: function(result) {
+                            Swal.fire({
+                                title: "{{ translate('failed') }}",
+                                text: result.responseText,
+                                icon: "error"
+                            });
                         }
                     });
                 }

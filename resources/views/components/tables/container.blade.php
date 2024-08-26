@@ -2,6 +2,7 @@
     'title' => '',
     'createUrl' => '',
     'createTitle' => '',
+    'createRoleName' => '',
 ])
 
 <div class="row g-4 mb-4 d-none">
@@ -94,14 +95,18 @@
 <div class="card">
     <div class="card-header">
         <div class="row">
-            <div class="col-md-6"><h5 class="card-title text-start">{{ translate($title) }}</h5></div>
             <div class="col-md-6">
-                <div class="text-end">
-                    <a href="{{ $createUrl }}" class="btn btn-primary">
-                        {{ translate($createTitle) }}
-                    </a>
-                </div>
+                <h5 class="card-title text-start">{{ translate($title) }}</h5>
             </div>
+            @can($createRoleName)
+                <div class="col-md-6">
+                    <div class="text-end">
+                        <a href="{{ $createUrl }}" class="btn btn-primary">
+                            {{ translate($createTitle) }}
+                        </a>
+                    </div>
+                </div>
+            @endcan
         </div>
     </div>
     <div class="card-datatable table-responsive container-fluid">

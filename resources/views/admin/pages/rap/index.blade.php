@@ -3,7 +3,7 @@
     DSM | Roles and persmissions
 @endsection
 @section('content')
-    <x-tables.container title="Manage Roles and permission" createTitle="Create New Role" :createUrl=" route('roles.create') ">
+    <x-tables.container createRoleName="RAP_Create" title="Manage Roles and permission" createTitle="Create New Role" :createUrl=" route('roles.create') ">
        <table class="table table-bordered" id="roles">
             <thead>
                 <th>

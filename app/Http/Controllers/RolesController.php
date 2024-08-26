@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Yajra\DataTables\DataTables;
 
@@ -43,63 +45,54 @@ class RolesController extends Controller
 
 
     public function create() {
-        return view('admin.pages.rap.form')->with(['roles' => Role::all()]);
+        return view('admin.pages.rap.form')->with(['permissions' => Permission::all()]);
     }
 
     public function store(Request $request) {
         $request->validate([
-            'name' => 'required|string|max:191',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'string|min:8|confirmed',
-            'role_id' => 'required',
-            'mobile' => 'string|required'
+            'name' => 'required|string|max:191|unique:roles,name',
         ]);
 
-        $role = Role::whereId($request->role_id)->first();
-        if($role == null) {
-            return back()->with('error', translate("Error In Role Input"));
-        }
-        $user = new User([  
-            'name' => $request->name,
-            'email' => $request->email,
-            'mobile' => $request->mobile,
-            'password' => Hash::make($request->password)
-        ]);
-        $user->save();
-        $user->syncRoles($role);
+        $role = new Role(['name' => $request->name]);
+        $role->save();
 
-        return redirect()->route('users.index')->with('success',translate("User Created Successfully"));
+
+        $role->syncPermissions(Permission::whereIn('id', $request->permissions)->pluck('name'));
+
+        return redirect()->route('roles.index')->with('success',translate("Role Created Successfully"));
     }
 
     public function edit($id) {
-        return view('admin.pages.users.form')->with(['roles'=> Role::all(), 'user' => User::findOrFail($id)]);
+        return view('admin.pages.rap.form')->with(['role'=> Role::findOrFail($id), 'permissions' => Permission::all()]);
     }
 
     public function update(Request $request, $id) {
         $request->validate([
             'name' => 'required|string|max:191',
-            'email' => 'required|email',
-            'password' => 'string|min:8|confirmed',
-            'role_id' => 'required',
-            'mobile' => 'string|required'
         ]);
 
-        //check mail
-        if(User::where('email',$request->email)->where('id','!=',$id)->first()) {
-            return back()->with('error', translate("Email is already taken"));
+        if(Role::where('id','!=',$id)->where('name', $request->name)->first()) {
+            return back()->with('error', translate("Role Name is taken"));
         }
 
-        $user = User::findOrFail($id);
-        $user->update($request->all());
-        $role = Role::whereId($request->role_id)->first();
-        $user->syncRoles($role);
+        $role = Role::findOrFail($id);
+        $role->update(['name' => $request->name]);
+        
+        $role->syncPermissions(Permission::whereIn('id', $request->permissions)->pluck('name'));
 
-        return redirect()->route('users.index')->with('success',translate("User Updated Successfully")); 
+        return redirect()->route('roles.index')->with('success',translate("Role Updated Successfully"));
+
     }
 
     public function destroy($id) {
-        $user = User::findOrFail($id);
-        $user->delete();
-        return redirect()->route('users.index')->with('success',translate("User Deleted Successfully")); 
+        $Role = Role::findOrFail($id);
+    
+        if(User::role($Role->name)->count() >= 1) {
+            return response(translate("We cannot delete role, Some users take this role"),500);
+        }
+        
+        $Role->delete();
+
+        return redirect()->route('roles.index')->with('success',translate("Role Deleted Successfully")); 
     }
 }
